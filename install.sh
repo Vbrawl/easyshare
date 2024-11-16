@@ -11,8 +11,8 @@ usage() {
 }
 
 install_binary() {
-  SOURCE="src/sendfile.sh"
-  DESTINATION="${BINARY_DIR}/sendfile"
+  SOURCE="src/easyshare.sh"
+  DESTINATION="${BINARY_DIR}/easyshare"
 
   echo "${SOURCE} -> ${DESTINATION}"
   cp "$SOURCE" "$DESTINATION"
