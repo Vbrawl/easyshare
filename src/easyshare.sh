@@ -10,7 +10,19 @@ help() {
 }
 
 get_default_ip() {
-  hostname -I | awk '{printf($1);}'
+  IP_LIST=$(hostname -I 2>/dev/null)
+  if [ "$?" -eq 0 ]
+  then
+    IP=$(echo "$IP_LIST" | awk '{printf($1);}')
+  else
+    #IP=$(ip -4 addr show | grep inet | tail -n1 | sed "s/\// /g" | awk '{printf($2);}')
+    IP=$(ip route show default | grep src | head -n1 | sed "s/.*src\( *\)//g" | sed "s/\///g" | awk '{printf($1);}')
+    if [ -z "$IP" ]
+    then
+      IP=$(ip route show | grep src | head -n1 | sed "s/.*src\( *\)//g" | sed "s/\///g" | awk '{printf($1);}')
+    fi
+  fi
+  echo "$IP"
 }
 
 get_server_qr() {
