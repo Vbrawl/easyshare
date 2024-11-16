@@ -4,6 +4,7 @@ help() {
   echo "$0 <options>"
   echo
   echo "options:"
+  echo "    -I interface    The interface to use for the server."
   echo "    -i IP           The ip address for the server [Default: 0.0.0.0]"
   echo "    -p PORT         The port number for the server [Default: 8080]"
   echo "    -d DIRECTORY    The directory to host [Default: .]"
@@ -21,6 +22,19 @@ get_default_ip() {
     then
       IP=$(ip route show | grep src | head -n1 | sed "s/.*src\( *\)//g" | sed "s/\///g" | awk '{printf($1);}')
     fi
+  fi
+  echo "$IP"
+}
+
+get_interface_ip() {
+  INTERFACE="$1"
+  INTERFACE_INET=$(ip addr show "$INTERFACE" | grep inet | head -n1)
+  if [ "$?" -eq 0 ]
+  then
+    IP=$(echo "$INTERFACE_INET" | sed "s/.*inet.\? //g" | sed "s/\// /g" | awk '{printf($1);}')
+  else
+    echo "Interface ${INTERFACE} not found!"
+    exit 1
   fi
   echo "$IP"
 }
@@ -46,13 +60,17 @@ host_server() {
 
 
 G_IP="0.0.0.0"
+G_INTERFACE=""
 G_PORT="8080"
 G_DIRECTORY="."
 
 
-while getopts ":hi:p:d:" arg
+while getopts ":hI:i:p:d:" arg
 do
   case "$arg" in
+    I)
+      G_INTERFACE="${OPTARG}"
+      ;;
     i)
       G_IP="${OPTARG}"
       ;;
@@ -73,6 +91,10 @@ do
   esac
 done
 
+if [ -n "$G_INTERFACE" ]
+then
+  G_IP=$(get_interface_ip "$G_INTERFACE")
+fi
 
 get_server_qr "$G_IP" "$G_PORT"
 host_server "$G_IP" "$G_PORT" "$G_DIRECTORY"
