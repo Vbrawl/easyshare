@@ -13,7 +13,7 @@ chmod +x "${BINARY_DIRECTORY}/easyshare"
 
 cat > "${DEBIAN_DIRECTORY}/control" << EOF
 Package: easyshare
-Version: 0.0.2
+Version: 0.0.3
 Section: web
 Priority: optional
 Architecture: all
