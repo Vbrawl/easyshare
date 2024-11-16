@@ -45,22 +45,22 @@ host_server() {
 }
 
 
-IP="0.0.0.0"
-PORT="8080"
-DIRECTORY="."
+G_IP="0.0.0.0"
+G_PORT="8080"
+G_DIRECTORY="."
 
 
 while getopts ":hi:p:d:" arg
 do
   case "$arg" in
     i)
-      IP="${OPTARG}"
+      G_IP="${OPTARG}"
       ;;
     p)
-      PORT="${OPTARG}"
+      G_PORT="${OPTARG}"
       ;;
     d)
-      DIRECTORY="${OPTARG}"
+      G_DIRECTORY="${OPTARG}"
       ;;
     h)
       help
@@ -74,5 +74,5 @@ do
 done
 
 
-get_server_qr "$IP" "$PORT"
-host_server "$IP" "$PORT" "$DIRECTORY"
+get_server_qr "$G_IP" "$G_PORT"
+host_server "$G_IP" "$G_PORT" "$G_DIRECTORY"
