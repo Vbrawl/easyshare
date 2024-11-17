@@ -29,13 +29,12 @@ get_default_ip() {
 
 get_interface_ip() {
   INTERFACE="$1"
-  INTERFACE_INET=$(ip addr show "$INTERFACE" | grep inet | head -n1)
+  INTERFACE_INET=$(ip addr show "$INTERFACE" 2>/dev/null)
   if [ "$?" -eq 0 ]
   then
-    IP=$(echo "$INTERFACE_INET" | sed "s/.*inet.\? //g" | sed "s/\// /g" | awk '{printf($1);}')
+    IP=$(echo "$INTERFACE_INET" | grep inet | head -n1 | sed "s/.*inet.\? //g" | sed "s/\// /g" | awk '{printf($1);}')
   else
-    echo "Interface ${INTERFACE} not found!"
-    exit 1
+    return 1
   fi
   echo "$IP"
 }
@@ -45,7 +44,7 @@ get_server_qr() {
   PORT=$2
   FILE=$3
 
-  if [ $IP = "0.0.0.0" ]
+  if [ "$IP" = "0.0.0.0" ]
   then
     IP=$(get_default_ip)
   fi
@@ -110,6 +109,11 @@ done
 if [ -n "$G_INTERFACE" ]
 then
   G_IP=$(get_interface_ip "$G_INTERFACE")
+  if [ "$?" -ne 0 ]
+  then
+    echo "Interface ${G_INTERFACE} not found!"
+    exit 1
+  fi
 fi
 
 get_server_qr "$G_IP" "$G_PORT" "$G_FILE"
