@@ -4,10 +4,11 @@ help() {
   echo "$0 <options>"
   echo
   echo "options:"
-  echo "    -I interface    The interface to use for the server."
-  echo "    -i IP           The ip address for the server [Default: 0.0.0.0]"
-  echo "    -p PORT         The port number for the server [Default: 8080]"
-  echo "    -d DIRECTORY    The directory to host [Default: .]"
+  echo "    -I interface         The interface to use for the server."
+  echo "    -i IP                The ip address for the server [Default: 0.0.0.0]"
+  echo "    -p PORT              The port number for the server [Default: 8080]"
+  echo "    -d FILE_OR_FOLDER    Same as -f"
+  echo "    -f FILE_OR_FOLDER    The file or folder to host [Default: .]"
 }
 
 get_default_ip() {
@@ -42,19 +43,34 @@ get_interface_ip() {
 get_server_qr() {
   IP=$1
   PORT=$2
+  FILE=$3
 
   if [ $IP = "0.0.0.0" ]
   then
     IP=$(get_default_ip)
   fi
 
-  qrencode -t utf8 "http://$IP:$PORT/"
+  if [ -d "$FILE" ]
+  then
+    FILE=""
+  else
+    FILE=$(basename $FILE)
+  fi
+
+  qrencode -t utf8 "http://$IP:$PORT/$FILE"
 }
 
 host_server() {
   IP=$1
   PORT=$2
-  DIRECTORY=$3
+  FILE=$3
+  DIRECTORY="$FILE"
+
+  if [ ! -d "$DIRECTORY" ]
+  then
+    DIRECTORY=$(dirname $FILE)
+  fi
+
   python -m http.server -d "$DIRECTORY" -b "$IP" "$PORT"
 }
 
@@ -62,10 +78,10 @@ host_server() {
 G_IP="0.0.0.0"
 G_INTERFACE=""
 G_PORT="8080"
-G_DIRECTORY="."
+G_FILE="."
 
 
-while getopts ":hI:i:p:d:" arg
+while getopts ":hI:i:p:d:f:" arg
 do
   case "$arg" in
     I)
@@ -77,8 +93,8 @@ do
     p)
       G_PORT="${OPTARG}"
       ;;
-    d)
-      G_DIRECTORY="${OPTARG}"
+    d|f)
+      G_FILE="${OPTARG}"
       ;;
     h)
       help
@@ -96,5 +112,5 @@ then
   G_IP=$(get_interface_ip "$G_INTERFACE")
 fi
 
-get_server_qr "$G_IP" "$G_PORT"
-host_server "$G_IP" "$G_PORT" "$G_DIRECTORY"
+get_server_qr "$G_IP" "$G_PORT" "$G_FILE"
+host_server "$G_IP" "$G_PORT" "$G_FILE"
