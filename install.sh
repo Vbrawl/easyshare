@@ -12,27 +12,28 @@ usage() {
   echo "    -h               Display this help menu"
 }
 
-install_binary() {
-  SOURCE="src/easyshare.sh"
-  DESTINATION="${BINARY_DIR}/easyshare"
+copy_file() {
+  SOURCE="$1"
+  DESTINATION="$2"
 
   echo "${SOURCE} -> ${DESTINATION}"
-  cp "$SOURCE" "$DESTINATION"
+  cp "${SOURCE}" "${DESTINATION}"
   chmod +x "$DESTINATION"
+}
+
+install_binary() {
+  mkdir -p "$1"
+  copy_file "src/easyshare.sh" "$1/easyshare"
 }
 
 install_bundle() {
-  SOURCE="src/easyshare_netinfo.py"
-  DESTINATION="${BUNDLE_DIR}/easyshare_netinfo.py"
-
-  mkdir -p "${BUNDLE_DIR}"
-  echo "${SOURCE} -> ${DESTINATION}"
-  cp "$SOURCE" "$DESTINATION"
-  chmod +x "$DESTINATION"
+  mkdir -p "$1"
+  copy_file "src/easyshare_netinfo.py" "$1/easyshare_netinfo.py"
+  copy_file "src/easyshare_qrencode.py" "$1/easyshare_qrencode.py"
 }
 
 
-while getopts ":hb:" arg
+while getopts ":hb:B:" arg
 do
   case $arg in
     B)
@@ -52,5 +53,5 @@ do
   esac
 done
 
-install_binary
-install_bundle
+install_binary "$BINARY_DIR"
+install_bundle "$BUNDLE_DIR"

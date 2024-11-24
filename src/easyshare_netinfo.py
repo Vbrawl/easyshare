@@ -1,6 +1,7 @@
 #!/bin/python
 
 import netifaces
+import socket
 
 
 def get_addresses(interface: str):
@@ -21,25 +22,34 @@ def get_addresses(interface: str):
     return addresses
 
 def get_default_ip():
-    gateways = netifaces.gateways()
+    try:
+        gateways = netifaces.gateways()
+    except PermissionError:
+        gateways = {}
     def_gateway = gateways.get("default", {})
 
+    # all ips reference gateway ips
     ip, interface = def_gateway.get(netifaces.AF_INET, (None, None))
     if ip is None or interface is None:
         ip, interface = def_gateway.get(netifaces.AF_INET6, (None, None))
 
     if ip is None or interface is None:
-        data = gateways.get(netifaces.AF_INET)
+        data = gateways.get(netifaces.AF_INET, [(None, None, False)])
         if len(data) >= 1:
             ip, interface, _ = data[0]
 
     if ip is None or interface is None:
-        data = gateways.get(netifaces.AF_INET6)
+        data = gateways.get(netifaces.AF_INET6, [(None, None, False)])
         if len(data) >= 1:
             ip, interface, _ = data[0]
 
     if ip is None or interface is None:
-        raise ValueError("No interface found")
+        # only case where ip is actually our ip
+        s = socket.socket()
+        s.connect(("google.com", 80))
+        ip = s.getsockname()
+        s.close()
+        return [ip[0]]
 
     return get_addresses(interface)
 

@@ -61,7 +61,7 @@ get_server_qr() {
     FILE=$(basename $FILE)
   fi
 
-  qrencode -t utf8 "http://$IP:$PORT/$FILE"
+  "$EASYSHARE_SOURCE_PREFIX"/easyshare_qrencode.py "http://$IP:$PORT/$FILE"
 }
 
 host_server() {
