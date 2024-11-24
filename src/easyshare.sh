@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# EASYSHARE_SOURCE_PREFIX
+if [ ! -n "$EASYSHARE_SOURCE_PREFIX" ]
+then
+  EASYSHARE_SOURCE_PREFIX="/usr/share/easyshare"
+fi
+
 help() {
   echo "$0 <options>"
   echo
@@ -12,27 +18,22 @@ help() {
 }
 
 get_default_ip() {
-  IP_LIST=$(hostname -I 2>/dev/null)
+  IP_LIST=$("$EASYSHARE_SOURCE_PREFIX"/easyshare_netinfo.py route 2>/dev/null)
   if [ "$?" -eq 0 ]
   then
     IP=$(echo "$IP_LIST" | awk '{printf($1);}')
   else
-    #IP=$(ip -4 addr show | grep inet | tail -n1 | sed "s/\// /g" | awk '{printf($2);}')
-    IP=$(ip route show default | grep src | head -n1 | sed "s/.*src\( *\)//g" | sed "s/\///g" | awk '{printf($1);}')
-    if [ -z "$IP" ]
-    then
-      IP=$(ip route show | grep src | head -n1 | sed "s/.*src\( *\)//g" | sed "s/\///g" | awk '{printf($1);}')
-    fi
+    return 1
   fi
   echo "$IP"
 }
 
 get_interface_ip() {
   INTERFACE="$1"
-  INTERFACE_INET=$(ip addr show "$INTERFACE" 2>/dev/null)
+  INTERFACE_INET=$("$EASYSHARE_SOURCE_PREFIX"/easyshare_netinfo.py addr "$INTERFACE" 2>/dev/null)
   if [ "$?" -eq 0 ]
   then
-    IP=$(echo "$INTERFACE_INET" | grep inet | head -n1 | sed "s/.*inet.\? //g" | sed "s/\// /g" | awk '{printf($1);}')
+    IP=$(echo "$INTERFACE_INET" | awk '{printf($1);}')
   else
     return 1
   fi
@@ -47,6 +48,10 @@ get_server_qr() {
   if [ "$IP" = "0.0.0.0" ]
   then
     IP=$(get_default_ip)
+    if [ "$?" -ne 0 ]
+    then
+      return 1
+    fi
   fi
 
   if [ -d "$FILE" ]
@@ -117,4 +122,9 @@ then
 fi
 
 get_server_qr "$G_IP" "$G_PORT" "$G_FILE"
+if [ "$?" -ne 0 ]
+then
+  echo "Couldn't generate QR code, this may also be a problem with finding your ip address!"
+  exit 1
+fi
 host_server "$G_IP" "$G_PORT" "$G_FILE"
