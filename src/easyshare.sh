@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# PROGRAM_NAME
+PROGRAM_NAME=$0
+if [ -n "$EASYPACK_NAME" ]
+then
+  PROGRAM_NAME=$(basename "$EASYPACK_NAME")
+fi
+
 # EASYSHARE_SOURCE_PREFIX
 if [ ! -n "$EASYSHARE_SOURCE_PREFIX" ]
 then
@@ -7,7 +14,7 @@ then
 fi
 
 help() {
-  echo "$0 <options>"
+  echo "${PROGRAM_NAME} <options>"
   echo
   echo "options:"
   echo "    -I interface         The interface to use for the server."

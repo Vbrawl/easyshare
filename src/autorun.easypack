@@ -1,0 +1,9 @@
+#!/bin/sh
+export EASYSHARE_SOURCE_PREFIX=$(pwd)
+
+chmod +x easyshare.sh
+chmod +x easyshare_netinfo.py
+chmod +x easyshare_qrencode.py
+
+cd ${EASYPACK_CWD}
+${EASYSHARE_SOURCE_PREFIX}/easyshare.sh $@
