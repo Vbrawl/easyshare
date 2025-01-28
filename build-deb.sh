@@ -1,27 +1,19 @@
 #!/bin/sh
 
-BUILD_DIRECTORY=$(mktemp -d)
+BUILD_DIRECTORY="$(mktemp -d)"
 
 DEBIAN_DIRECTORY="${BUILD_DIRECTORY}/DEBIAN"
 BINARY_DIRECTORY="${BUILD_DIRECTORY}/usr/bin"
-BUNDLE_DIRECTORY="${BUILD_DIRECTORY}/usr/share/easyshare"
 
 mkdir -p "${DEBIAN_DIRECTORY}"
 mkdir -p "${BINARY_DIRECTORY}"
-mkdir -p "${BUNDLE_DIRECTORY}"
 
-cp "src/easyshare.sh" "${BINARY_DIRECTORY}/easyshare"
-chmod +x "${BINARY_DIRECTORY}/easyshare"
-
-cp "src/easyshare_netinfo.py" "${BUNDLE_DIRECTORY}/easyshare_netinfo.py"
-chmod +x "${BUNDLE_DIRECTORY}/easyshare_netinfo.py"
-
-cp "src/easyshare_qrencode.py" "${BUNDLE_DIRECTORY}/easyshare_qrencode.py"
-chmod +x "${BUNDLE_DIRECTORY}/easyshare_qrencode.py"
+./build-standalone.sh
+cp easyshare.elf "${BINARY_DIRECTORY}/easyshare"
 
 cat > "${DEBIAN_DIRECTORY}/control" << EOF
 Package: easyshare
-Version: 0.0.7
+Version: 0.0.8
 Section: web
 Priority: optional
 Architecture: all
